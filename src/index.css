@@ -11,3 +11,25 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+:root{
+  --white-color: #fff;
+  --black-color: #000;
+  --text-color: #333;
+  --gold-color: rgb(255, 242, 0);
+  --primary-color: #fe582b;
+  --boder-color:#8888;
+  --header-height: 120px;
+  --header-navbar: 36px;
+  --header-sort-bar-height: 46px;
+  --header-with-search: calc(var( --header-height) - var( --header-navbar))
+}
+*{
+  box-sizing: inherit;
+}
+
+html{
+  font-size: 62.5%;
+  line-height: 1.6rem;
+  font-family: 'Roboto', sans-serif;
+  box-sizing: border-box;
+}

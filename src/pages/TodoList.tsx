@@ -3,17 +3,76 @@ import imageDown from '../assets/image/down.png'
 import imageDelete from '../assets/image/delete.png'
 import imageEdit from '../assets/image/pencil.png'
 import { useState } from 'react'
-import { useGetPostsQuery } from './todo.service'
+import { useAddPostMutation, useDeletePostMutation, useGetPostsQuery, useUpdatePostMutation } from './todo.service'
+import { Post } from './todo.type'
+
+const initialState: Omit<Post, 'id'> = {
+    userId:1,
+    title:'',
+    body:'testbody'
+}
+
 function TodoList() {
     const [showInput, setShowInput]= useState<Boolean>(false)
+    const [formData, setFormData] = useState<Omit<Post, 'id'> | Post>(initialState)
+    const [modeEdit,setModeEdit] = useState<Boolean>(false)
+    const [editPostId,setEditPostId]= useState<number>(0)
 
     const handleShowInput = () =>{
-        setShowInput(!showInput)
+        setShowInput(true)
+        setFormData(initialState)
+        setModeEdit(false)
     }
 
     const {data,isLoading,isFetching}= useGetPostsQuery()
 
-    console.log(data);
+    const [addPost,addPostResult] = useAddPostMutation()
+
+    const [updatePost, updatePostResult] = useUpdatePostMutation()
+
+    const [deletePost, deletePostResult] = useDeletePostMutation()
+
+    const handlOnchange = (e:React.ChangeEvent<HTMLInputElement>) =>{
+        setFormData((prev)=>(
+            {
+                ...prev,
+                title: e.target.value
+            }
+        ))
+    }
+
+    const handleEdit = (post: Post)=>{
+        setModeEdit(true)
+        setShowInput(true)
+        setFormData(post)
+        setEditPostId(post.id)
+        
+    }
+
+    const handleSubmit = async()=>{
+        if(!modeEdit) {
+            const result =   await addPost(formData).unwrap()
+            console.log("you create post succes:",result)
+        }else{
+           
+            const result =   await updatePost({
+                body:formData,
+                id:editPostId
+            }).unwrap()
+
+            console.log(result);
+            
+        }
+       
+        setFormData(initialState)
+       
+    }
+
+    const handleDelete = (id:number)=>{
+
+        deletePost(id)
+    }
+   
     
     return <div className="container">
        <div className='wrap-todo'>
@@ -27,8 +86,8 @@ function TodoList() {
             </div>
             {showInput && 
              <div className='input'>
-                <input type="text" className='input-add' placeholder='Enter task'/>
-                <button className='btn-add'>add</button>
+                <input type="text" className='input-add' value={formData.title} placeholder='Enter task' onChange={handlOnchange}/>
+                <button className='btn-add' onClick={handleSubmit}>{modeEdit ? "edit" : "add"}</button>
             </div>
             }
             
@@ -37,8 +96,8 @@ function TodoList() {
                     return <div className='item' key={item.id}>
                     <span className="title">{item.title}</span>
                     <div className='btn-control'>
-                        <img src={imageDelete} alt="" />
-                        <img src={imageEdit} alt="" />
+                        <img src={imageDelete} alt="" onClick={()=>handleDelete(item.id)}/>
+                        <img src={imageEdit} alt="" onClick={()=>handleEdit(item)}/>
                     </div>
                 </div>
                 })}

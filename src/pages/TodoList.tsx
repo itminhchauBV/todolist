@@ -3,12 +3,18 @@ import imageDown from '../assets/image/down.png'
 import imageDelete from '../assets/image/delete.png'
 import imageEdit from '../assets/image/pencil.png'
 import { useState } from 'react'
+import { useGetPostsQuery } from './todo.service'
 function TodoList() {
     const [showInput, setShowInput]= useState<Boolean>(false)
 
     const handleShowInput = () =>{
         setShowInput(!showInput)
     }
+
+    const {data,isLoading,isFetching}= useGetPostsQuery()
+
+    console.log(data);
+    
     return <div className="container">
        <div className='wrap-todo'>
             <h1>TODO LIST</h1>
@@ -27,55 +33,17 @@ function TodoList() {
             }
             
             <div className='content'>
-                <div className='item'>
-                    <span className="title">todo 1234567</span>
+                {data && data.map((item)=>{
+                    return <div className='item' key={item.id}>
+                    <span className="title">{item.title}</span>
                     <div className='btn-control'>
                         <img src={imageDelete} alt="" />
                         <img src={imageEdit} alt="" />
                     </div>
                 </div>
-                <div className='item'>
-                    <span className="title">todo 1234567</span>
-                    <div className='btn-control'>
-                        <img src={imageDelete} alt="" />
-                        <img src={imageEdit} alt="" />
-                    </div>
-                </div>
-                <div className='item'>
-                    <span className="title">todo 1234567</span>
-                    <div className='btn-control'>
-                        <img src={imageDelete} alt="" />
-                        <img src={imageEdit} alt="" />
-                    </div>
-                </div>
-                <div className='item'>
-                    <span className="title">todo 1234567</span>
-                    <div className='btn-control'>
-                        <img src={imageDelete} alt="" />
-                        <img src={imageEdit} alt="" />
-                    </div>
-                </div>
-                <div className='item'>
-                    <span className="title">todo 1234567</span>
-                    <div className='btn-control'>
-                        <img src={imageDelete} alt="" />
-                        <img src={imageEdit} alt="" />
-                    </div>
-                </div>
-                <div className='item'>
-                    <span className="title">todo 1234567</span>
-                    <div className='btn-control'>
-                        <img src={imageDelete} alt="" />
-                        <img src={imageEdit} alt="" />
-                    </div>
-                </div>
-                <div className='item'>
-                    <span className="title">todo 1234567</span>
-                    <div className='btn-control'>
-                        <img src={imageDelete} alt="" />
-                        <img src={imageEdit} alt="" />
-                    </div>
-                </div>
+                })}
+            
+               
             </div>
        </div>
     </div>

@@ -4,7 +4,7 @@ import { Post } from './todo.type'
 export const todoApi = createApi({
     reducerPath: 'blogAppi',
     tagTypes: ['Posts'],
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://jsonplaceholder.typicode.com/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'https://6600df6687c91a116419b2f6.mockapi.io/api/v1/' }),
     endpoints: build => ({
         getPosts: build.query<Post[], string>({
             query: (endPoint) => {

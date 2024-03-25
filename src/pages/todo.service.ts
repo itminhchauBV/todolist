@@ -1,6 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Post } from './todo.type'
 
+interface DeletePostRequest {
+    idPosts: number[]
+}
+
 export const todoApi = createApi({
     reducerPath: 'blogAppi',
     tagTypes: ['Posts'],
@@ -53,13 +57,15 @@ export const todoApi = createApi({
         }),
 
         deletePost: build.mutation<{}, number>({
-            query: (id) => {  
+            query: (idPosts) => {
                 return {
-                    url: `posts/${id}`,
+                    url: `posts/${idPosts}`,
                     method: 'DELETE',
+
                 }
+
             },
-            invalidatesTags: (result, error, id) => [{ type: "Posts", id: id }]
+            invalidatesTags: (result, error) => [{ type: "Posts" }]
         })
     }),
 

@@ -36,9 +36,6 @@ export const todoApi = createApi({
                     url: 'posts',
                     method: 'POST',
                     body,
-                    headers: {
-                        'Content-type': 'application/json; charset=UTF-8',
-                    },
                 }
             },
             invalidatesTags: (result, error, body) => [{ type: "Posts", id: 'LIST' }]
@@ -50,22 +47,16 @@ export const todoApi = createApi({
                     url: `posts/${data.id}`,
                     method: 'PUT',
                     body: data.body,
-                    headers: {
-                        'Content-type': 'application/json; charset=UTF-8',
-                    },
                 }
             },
             invalidatesTags: (result, error, data) => [{ type: "Posts", id: data.id }]
         }),
 
         deletePost: build.mutation<{}, number>({
-            query: (id) => {
+            query: (id) => {  
                 return {
                     url: `posts/${id}`,
                     method: 'DELETE',
-                    headers: {
-                        'Content-type': 'application/json; charset=UTF-8',
-                    },
                 }
             },
             invalidatesTags: (result, error, id) => [{ type: "Posts", id: id }]

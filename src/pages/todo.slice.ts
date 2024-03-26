@@ -1,19 +1,24 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 
 interface TodoState{
-    todoId:string
+    postId:number
 }
 
 const initialState: TodoState ={
-    todoId:''
+    postId:0
 }
 
 const todoSlice = createSlice({
     name:'todo',
     initialState,
-    reducers:{}
+    reducers:{
+        savePostId: (state, action:PayloadAction<number>)=>{
+            state.postId = action.payload
+        }
+    }
 })
 
 const todoReducer = todoSlice.reducer
+export const {savePostId} = todoSlice.actions
 
 export default todoReducer

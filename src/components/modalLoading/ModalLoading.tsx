@@ -4,7 +4,7 @@ interface ModalLoadingProps {
 }
 function ModalLoading({ title }: ModalLoadingProps) {
   return (
-    <div className="modal">
+    <div className="modal-loading">
       <div className="modal_overlay">
         <div className="modal_body">
           <div className="loading"></div>

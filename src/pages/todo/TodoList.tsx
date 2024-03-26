@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import ModalLoading from "../../components/ModalLoading";
+import { useCallback, useEffect, useState } from "react";
+import ModalLoading from "../../components/modalLoading/ModalLoading";
 import {
   useAddPostMutation,
   useDeletePostMutation,
@@ -9,30 +9,35 @@ import {
 import { Post } from "../todo.type";
 import ItemTodo from "./item/ItemTodo";
 import "./style.scss";
+import ModalConfirm from "../../components/modalConfirm/ModalConfirm";
 
 const initialState: Omit<Post, "id"> = {
-  userId: 1,
   title: "",
   body: "testbody",
 };
 
 function TodoList() {
-  const [showInput, setShowInput] = useState<Boolean>(false);
+  const [showInput, setShowInput] = useState<boolean>(false);
   const [formData, setFormData] = useState<Omit<Post, "id"> | Post>(
     initialState
   );
-  const [modeEdit, setModeEdit] = useState<Boolean>(false);
+  const [modeEdit, setModeEdit] = useState<boolean>(false);
   const [editPostId, setEditPostId] = useState<number>(0);
+  const [deletePostId, setDeletePostId] = useState<number>(0);
   const [selectPosts, setSelectPosts] = useState<number[]>([]);
   const [listPost, setListPost] = useState<Post[]>([]);
-
+  const [showModalDelete, setShowModalDelete] = useState<boolean>(false);
+  const [checkDeleteMultiple, setCheckDeleteMultiple] =
+    useState<boolean>(false);
+  //   const [isDelete, setIsDelete] = useState<boolean>(false);
   const handleShowInput = () => {
     setShowInput(true);
     setFormData(initialState);
     setModeEdit(false);
+    setEditPostId(0);
   };
 
-  const { data, isLoading, isFetching } = useGetPostsQuery("posts");
+  const { data, isLoading, isFetching, isSuccess } = useGetPostsQuery("posts");
   const [addPost, addPostResult] = useAddPostMutation();
   const [updatePost, updatePostResult] = useUpdatePostMutation();
   const [deletePost, deletePostResult] = useDeletePostMutation();
@@ -53,6 +58,7 @@ function TodoList() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // setIsDelete(false);
     if (!modeEdit) {
       const result = await addPost(formData).unwrap();
     } else {
@@ -68,7 +74,7 @@ function TodoList() {
       });
 
       setListPost(newListPost);
-
+      setEditPostId(0);
       updatePost({
         body: formData,
         id: editPostId,
@@ -90,15 +96,27 @@ function TodoList() {
     setFormData(initialState);
   };
 
-  const handleDelete = (id: number) => {
-    const newListPost = listPost.filter((item) => item.id !== id);
-    setListPost(newListPost);
-    deletePost(id);
-    console.log("status", deletePostResult);
-    if (!deletePostResult.isSuccess) {
-      if (data) {
-        setListPost(data);
+  const handleClickDelete = (id: number) => {
+    setShowModalDelete(true);
+    setDeletePostId(id);
+  };
+
+  const handleDelete = () => {
+    // setIsDelete(true);
+    if (checkDeleteMultiple) {
+      handleDeletMultiple();
+    } else {
+      const newListPost = listPost.filter((item) => item.id !== deletePostId);
+      setListPost(newListPost);
+      deletePost(deletePostId);
+      console.log("status", deletePostResult);
+      if (!deletePostResult.isSuccess) {
+        if (data) {
+          setListPost(data);
+        }
       }
+      setShowModalDelete(false);
+      setDeletePostId(0);
     }
   };
 
@@ -120,11 +138,26 @@ function TodoList() {
         });
     }
     setSelectPosts([]);
+    setShowModalDelete(false);
+    setCheckDeleteMultiple(false);
+  };
+
+  const handleClickDeleteMultiple = () => {
+    setShowModalDelete(true);
+    setCheckDeleteMultiple(true);
+  };
+
+  const handleCancelModalDelete = () => {
+    setShowModalDelete(false);
+    setCheckDeleteMultiple(false);
+    setDeletePostId(0);
+    // setIsDelete(false);
   };
 
   useEffect(() => {
     if (data) {
       setListPost(data);
+      console.log("da goi");
     }
   }, [data]);
 
@@ -137,10 +170,27 @@ function TodoList() {
             Add Task
           </button>
           <div>
-            <button onClick={handleDeletMultiple} className="delete-multiple">
+            <button
+              onClick={handleClickDeleteMultiple}
+              className="delete-multiple"
+            >
               Delete
             </button>
           </div>
+        </div>
+        <div className="check-all">
+          <span>choose all</span>
+          <input
+            type="checkbox"
+            onChange={(e) => {
+              if (e.target.checked) {
+                const idPosts = listPost.map((post) => post.id);
+                setSelectPosts(idPosts);
+              } else {
+                setSelectPosts([]);
+              }
+            }}
+          />
         </div>
         {showInput && (
           <form className="input" onSubmit={handleSubmit}>
@@ -152,9 +202,22 @@ function TodoList() {
               onChange={handlOnchange}
               required
             />
+
             <button className="btn-add" type="submit">
               {modeEdit ? "edit" : "add"}
             </button>
+            {modeEdit && (
+              <button
+                type="button"
+                className="btn-cancel"
+                onClick={() => {
+                  setFormData(initialState);
+                  setEditPostId(0);
+                }}
+              >
+                Cancel
+              </button>
+            )}
           </form>
         )}
 
@@ -166,10 +229,11 @@ function TodoList() {
                   <ItemTodo
                     key={item.id}
                     item={item}
-                    handleDelete={handleDelete}
+                    handleClickDelete={handleClickDelete}
                     handleEdit={handleEdit}
                     selectPosts={selectPosts}
                     setSelectPosts={setSelectPosts}
+                    idChecked={editPostId}
                   />
                 </>
               );
@@ -183,6 +247,12 @@ function TodoList() {
         )}
         {addPostResult && addPostResult.isLoading && (
           <ModalLoading title="Adding" />
+        )}
+        {showModalDelete && (
+          <ModalConfirm
+            handleDelete={handleDelete}
+            handleCancelModalDelete={handleCancelModalDelete}
+          />
         )}
       </div>
     </div>

@@ -1,0 +1,30 @@
+.wrap-tooltip{
+    display: none;
+    position: absolute;
+    background-color: #d14f1c;
+    color: #fff;
+    top: 1px;
+    right: 30px;
+    width: 150px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-align: center;
+    z-index: 100;
+    .title-tooltip{
+        font-size: 12px;
+        font-style: bold;
+        font-family: 600;
+        text-transform: capitalize;
+    }
+    &::before{
+        content: "";
+        display: block;
+        border-width: 8px 8px;
+        border-style: solid;
+        border-color: transparent  transparent  transparent #d14f1c;
+        position: absolute;
+        top: 13%;
+        right: -16px;
+        z-index: 0;
+    }
+}

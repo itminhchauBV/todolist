@@ -5,6 +5,7 @@
     padding: 24px;
 
     .wrap-todo {
+        position: relative;
         margin: auto;
         width: 100%;
         height: 100%;
@@ -18,7 +19,7 @@
         h1 {
             margin-bottom: 24px;
         }
-
+        
         .btn {
             width: 100%;
             display: flex;
@@ -119,6 +120,7 @@
             height: 100%;
 
             .item {
+                margin-top: 16px;
                 width: 100%;
                 height: 50px;
                 margin: 8px 0px;
@@ -130,7 +132,7 @@
                 align-items: center;
                 text-align: start;
 
-                span {
+                .title {
                     font-size: 16px;
                 }
 
@@ -138,14 +140,39 @@
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    gap: 8px;
+                    .icon-delete{
+                        position: relative;
+                        background-image: url('../../assets/image/delete.png');
+                        width: 18px;
+                        height: 18px;
+                        background-size: cover;
+                        cursor: pointer;
+                        &:hover .wrap-tooltip{
+                            display: block;
+                        }
+                    }
 
+                    .icon-edit{
+                        position: relative;
+                        background-image: url('../../assets/image/pencil.png');
+                        width: 18px;
+                        height: 18px;
+                        background-size: cover;
+                        cursor: pointer;
+                        &:hover .wrap-tooltip{
+                            display: block;
+                        }
+                    }
                     img {
+                      
                         width: 24px;
                         margin-left: 8px;
                         cursor: pointer;
                         box-sizing: border-box;
                         padding: 4px;
                         border-radius: 4px;
+                       
                     }
 
                     input[type=checkbox] {

@@ -18,7 +18,7 @@ const initialState: Omit<Post, 'id'> = {
 }
 
 function TodoList() {
-  const dataRef = useRef<Post[]>()
+  const dataRef = useRef<Post[]>([])
   const [chooseAll, setChooseAll] = useState<boolean>(false)
   const [showInput, setShowInput] = useState<boolean>(false)
   const [formData, setFormData] = useState<Omit<Post, 'id'> | Post>(initialState)
@@ -29,8 +29,9 @@ function TodoList() {
   const [listPost, setListPost] = useState<Post[]>([])
   const [showModalDelete, setShowModalDelete] = useState<boolean>(false)
   const [checkDeleteMultiple, setCheckDeleteMultiple] = useState<boolean>(false)
+  const [checkErrorDelete, setCheckErrorDelete] = useState<boolean>(false)
 
-  const { data } = useGetPostsQuery('posts')
+  const { data, isSuccess, isFetching } = useGetPostsQuery('posts')
   const [addPost, addPostResult] = useAddPostMutation()
   const [updatePost, updatePostResult] = useUpdatePostMutation()
   const [deletePost, deletePostResult] = useDeletePostMutation()
@@ -83,14 +84,11 @@ function TodoList() {
         id: editPostId,
       })
         .unwrap()
-        .then(() => {
-          console.log('Products deleted successfully.')
-        })
+        .then(() => {})
         .catch((error) => {
           if (data) {
             setListPost(data)
           }
-          console.error('Error deleting products:', error)
         })
     }
     setFormData(initialState)
@@ -109,14 +107,19 @@ function TodoList() {
     } else {
       const newListPost = listPost.filter((item) => item.id !== deletePostId)
       setListPost(newListPost)
+
       dataRef.current = newListPost
+
       deletePost(deletePostId)
         .unwrap()
-        .then(() => {})
+        .then((res) => {
+          console.log('da xoa thanh cong')
+        })
         .catch(() => {
           if (data) {
             setListPost(data)
           }
+          setCheckErrorDelete(true)
         })
       setShowModalDelete(false)
       setDeletePostId(0)
@@ -131,15 +134,18 @@ function TodoList() {
     deleteMultiplePost(selectPosts)
       .unwrap()
       .then(() => {
-        setChooseAll(false)
         setSelectPosts([])
         setCheckDeleteMultiple(false)
       })
       .catch(() => {
+        console.log('da vao loi')
+
         if (data) {
           setListPost(data)
         }
+        // setCheckErrorDelete(true)
       })
+    setChooseAll(false)
     setShowModalDelete(false)
   }
 
@@ -158,6 +164,8 @@ function TodoList() {
 
   useEffect(() => {
     if (data && dataRef.current?.length !== data.length) {
+      console.log('gọi lại')
+
       setListPost(data)
     }
   }, [data, dataRef])

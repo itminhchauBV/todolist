@@ -1,165 +1,166 @@
-import { useCallback, useEffect, useState } from "react";
-import ModalLoading from "../../components/modalLoading/ModalLoading";
+import { useEffect, useRef, useState } from 'react'
+import ModalConfirm from '../../components/modalConfirm/ModalConfirm'
+import ModalLoading from '../../components/modalLoading/ModalLoading'
 import {
   useAddPostMutation,
+  useDeleteMultipleMutation,
   useDeletePostMutation,
   useGetPostsQuery,
   useUpdatePostMutation,
-} from "../todo.service";
-import { Post } from "../todo.type";
-import ItemTodo from "./item/ItemTodo";
-import "./style.scss";
-import ModalConfirm from "../../components/modalConfirm/ModalConfirm";
+} from '../todo.service'
+import { Post } from '../todo.type'
+import ItemTodo from './item/ItemTodo'
+import './style.scss'
 
-const initialState: Omit<Post, "id"> = {
-  title: "",
-  body: "testbody",
-};
+const initialState: Omit<Post, 'id'> = {
+  title: '',
+  body: 'testbody',
+}
 
 function TodoList() {
-  const [showInput, setShowInput] = useState<boolean>(false);
-  const [formData, setFormData] = useState<Omit<Post, "id"> | Post>(
-    initialState
-  );
-  const [modeEdit, setModeEdit] = useState<boolean>(false);
-  const [editPostId, setEditPostId] = useState<number>(0);
-  const [deletePostId, setDeletePostId] = useState<number>(0);
-  const [selectPosts, setSelectPosts] = useState<number[]>([]);
-  const [listPost, setListPost] = useState<Post[]>([]);
-  const [showModalDelete, setShowModalDelete] = useState<boolean>(false);
-  const [checkDeleteMultiple, setCheckDeleteMultiple] =
-    useState<boolean>(false);
-  //   const [isDelete, setIsDelete] = useState<boolean>(false);
+  const dataRef = useRef<Post[]>()
+  const [chooseAll, setChooseAll] = useState<boolean>(false)
+  const [showInput, setShowInput] = useState<boolean>(false)
+  const [formData, setFormData] = useState<Omit<Post, 'id'> | Post>(initialState)
+  const [modeEdit, setModeEdit] = useState<boolean>(false)
+  const [editPostId, setEditPostId] = useState<number>(0)
+  const [deletePostId, setDeletePostId] = useState<number>(0)
+  const [selectPosts, setSelectPosts] = useState<number[]>([])
+  const [listPost, setListPost] = useState<Post[]>([])
+  const [showModalDelete, setShowModalDelete] = useState<boolean>(false)
+  const [checkDeleteMultiple, setCheckDeleteMultiple] = useState<boolean>(false)
+
+  const { data } = useGetPostsQuery('posts')
+  const [addPost, addPostResult] = useAddPostMutation()
+  const [updatePost, updatePostResult] = useUpdatePostMutation()
+  const [deletePost, deletePostResult] = useDeletePostMutation()
+  const [deleteMultiplePost, deleteMultiplePostResult] = useDeleteMultipleMutation()
+
+  // show input add task
   const handleShowInput = () => {
-    setShowInput(true);
-    setFormData(initialState);
-    setModeEdit(false);
-    setEditPostId(0);
-  };
+    setShowInput(true)
+    setFormData(initialState)
+    setModeEdit(false)
+    setEditPostId(0)
+  }
 
-  const { data, isLoading, isFetching, isSuccess } = useGetPostsQuery("posts");
-  const [addPost, addPostResult] = useAddPostMutation();
-  const [updatePost, updatePostResult] = useUpdatePostMutation();
-  const [deletePost, deletePostResult] = useDeletePostMutation();
-
+  // onchange input add task
   const handlOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       title: e.target.value,
-    }));
-  };
+    }))
+  }
 
+  // handle set states edit
   const handleEdit = (post: Post) => {
-    setModeEdit(true);
-    setShowInput(true);
-    setFormData(post);
-    setEditPostId(post.id);
-  };
+    setModeEdit(true)
+    setShowInput(true)
+    setFormData(post)
+    setEditPostId(post.id)
+  }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // setIsDelete(false);
+  // handle submit of add and edit taskk
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     if (!modeEdit) {
-      const result = await addPost(formData).unwrap();
+      addPost(formData)
     } else {
       const newListPost = listPost.map((post, index) => {
         if (post.id === editPostId) {
           const newFormData = {
             id: editPostId,
             ...formData,
-          };
-          post = newFormData;
+          }
+          post = newFormData
         }
-        return post;
-      });
-
-      setListPost(newListPost);
-      setEditPostId(0);
+        return post
+      })
+      setListPost(newListPost)
+      setEditPostId(0)
       updatePost({
         body: formData,
         id: editPostId,
       })
         .unwrap()
         .then(() => {
-          // Xử lý khi edit thành công
-          console.log("Products deleted successfully.");
+          console.log('Products deleted successfully.')
         })
         .catch((error) => {
-          // Xử lý khi edit thất bại
           if (data) {
-            setListPost(data);
+            setListPost(data)
           }
-
-          console.error("Error deleting products:", error);
-        });
+          console.error('Error deleting products:', error)
+        })
     }
-    setFormData(initialState);
-  };
+    setFormData(initialState)
+  }
 
+  // when click item show modal and set state id item in DeletePostId
   const handleClickDelete = (id: number) => {
-    setShowModalDelete(true);
-    setDeletePostId(id);
-  };
+    setShowModalDelete(true)
+    setDeletePostId(id)
+  }
 
+  // handle delete post
   const handleDelete = () => {
-    // setIsDelete(true);
     if (checkDeleteMultiple) {
-      handleDeletMultiple();
+      handleDeletMultiple()
     } else {
-      const newListPost = listPost.filter((item) => item.id !== deletePostId);
-      setListPost(newListPost);
-      deletePost(deletePostId);
-      console.log("status", deletePostResult);
-      if (!deletePostResult.isSuccess) {
-        if (data) {
-          setListPost(data);
-        }
-      }
-      setShowModalDelete(false);
-      setDeletePostId(0);
-    }
-  };
-
-  const handleDeletMultiple = () => {
-    for (const id of selectPosts) {
-      deletePost(id)
+      const newListPost = listPost.filter((item) => item.id !== deletePostId)
+      setListPost(newListPost)
+      dataRef.current = newListPost
+      deletePost(deletePostId)
         .unwrap()
-        .then(() => {
-          // Xử lý khi xóa thành công
-          console.log("Products deleted successfully.", id);
-        })
-        .catch((error) => {
-          // Xử lý khi xóa thất bại
+        .then(() => {})
+        .catch(() => {
           if (data) {
-            setListPost(data);
+            setListPost(data)
           }
-
-          console.error("Error deleting products:", error);
-        });
+        })
+      setShowModalDelete(false)
+      setDeletePostId(0)
     }
-    setSelectPosts([]);
-    setShowModalDelete(false);
-    setCheckDeleteMultiple(false);
-  };
+  }
 
+  // handle delete multiple post
+  const handleDeletMultiple = () => {
+    const newListPost = listPost.filter((item) => !selectPosts.includes(item.id))
+    setListPost(newListPost)
+    dataRef.current = newListPost
+    deleteMultiplePost(selectPosts)
+      .unwrap()
+      .then(() => {
+        setChooseAll(false)
+        setSelectPosts([])
+        setCheckDeleteMultiple(false)
+      })
+      .catch(() => {
+        if (data) {
+          setListPost(data)
+        }
+      })
+    setShowModalDelete(false)
+  }
+
+  // when click button delete all
   const handleClickDeleteMultiple = () => {
-    setShowModalDelete(true);
-    setCheckDeleteMultiple(true);
-  };
+    setShowModalDelete(true)
+    setCheckDeleteMultiple(true)
+  }
 
+  // cancle modal confirm delete
   const handleCancelModalDelete = () => {
-    setShowModalDelete(false);
-    setCheckDeleteMultiple(false);
-    setDeletePostId(0);
-    // setIsDelete(false);
-  };
+    setShowModalDelete(false)
+    setCheckDeleteMultiple(false)
+    setDeletePostId(0)
+  }
 
   useEffect(() => {
-    if (data) {
-      setListPost(data);
-      console.log("da goi");
+    if (data && dataRef.current?.length !== data.length) {
+      setListPost(data)
     }
-  }, [data]);
+  }, [data, dataRef])
 
   return (
     <div className="container">
@@ -170,10 +171,7 @@ function TodoList() {
             Add Task
           </button>
           <div>
-            <button
-              onClick={handleClickDeleteMultiple}
-              className="delete-multiple"
-            >
+            <button onClick={handleClickDeleteMultiple} className="delete-multiple">
               Delete
             </button>
           </div>
@@ -182,12 +180,15 @@ function TodoList() {
           <span>choose all</span>
           <input
             type="checkbox"
+            checked={chooseAll}
             onChange={(e) => {
               if (e.target.checked) {
-                const idPosts = listPost.map((post) => post.id);
-                setSelectPosts(idPosts);
+                const idPosts = listPost.map((post) => post.id)
+                setSelectPosts(idPosts)
+                setChooseAll(true)
               } else {
-                setSelectPosts([]);
+                setSelectPosts([])
+                setChooseAll(false)
               }
             }}
           />
@@ -204,15 +205,16 @@ function TodoList() {
             />
 
             <button className="btn-add" type="submit">
-              {modeEdit ? "edit" : "add"}
+              {modeEdit ? 'edit' : 'add'}
             </button>
             {modeEdit && (
               <button
                 type="button"
                 className="btn-cancel"
                 onClick={() => {
-                  setFormData(initialState);
-                  setEditPostId(0);
+                  setFormData(initialState)
+                  setEditPostId(0)
+                  setModeEdit(false)
                 }}
               >
                 Cancel
@@ -236,27 +238,19 @@ function TodoList() {
                     idChecked={editPostId}
                   />
                 </>
-              );
+              )
             })}
         </div>
-        {deletePostResult && deletePostResult.isLoading && (
-          <ModalLoading title="Deleting" />
-        )}
-        {updatePostResult && updatePostResult.isLoading && (
-          <ModalLoading title="Updating" />
-        )}
-        {addPostResult && addPostResult.isLoading && (
-          <ModalLoading title="Adding" />
-        )}
+        {deletePostResult && deletePostResult.isLoading && <ModalLoading title="Deleting" />}
+        {deleteMultiplePostResult && deleteMultiplePostResult.isLoading && <ModalLoading title="Deleting" />}
+        {updatePostResult && updatePostResult.isLoading && <ModalLoading title="Updating" />}
+        {addPostResult && addPostResult.isLoading && <ModalLoading title="Adding" />}
         {showModalDelete && (
-          <ModalConfirm
-            handleDelete={handleDelete}
-            handleCancelModalDelete={handleCancelModalDelete}
-          />
+          <ModalConfirm handleDelete={handleDelete} handleCancelModalDelete={handleCancelModalDelete} />
         )}
       </div>
     </div>
-  );
+  )
 }
 
-export default TodoList;
+export default TodoList

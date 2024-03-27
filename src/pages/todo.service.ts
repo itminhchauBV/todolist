@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Post } from './todo.type'
-import { url } from 'inspector'
 
 export const todoApi = createApi({
     reducerPath: 'blogAppi',
@@ -61,8 +60,21 @@ export const todoApi = createApi({
                 }
             },
             invalidatesTags: (result, error) => [{ type: "Posts" }]
-        })
+        }),
+        
+        deleteMultiple: build.mutation<number, number[]>({
+            async queryFn(idPosts, _queryApi, _extraOptions, baseQuery) {
+              for (const idPost of idPosts) {
+                await baseQuery({
+                  url: `posts/${idPost}/`,
+                  method: 'DELETE',
+                });
+              }
+              return { data: idPosts.length };
+            },
+            invalidatesTags: (result, error) => [{ type: "Posts" }]
+          }),
     }),
 })
 
-export const { useGetPostsQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation } = todoApi
+export const { useGetPostsQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation, useDeleteMultipleMutation } = todoApi

@@ -1,6 +1,6 @@
-import "./ModalLoading.scss";
+import './ModalLoading.scss'
 interface ModalLoadingProps {
-  title: string;
+  title: string
 }
 function ModalLoading({ title }: ModalLoadingProps) {
   return (
@@ -12,7 +12,7 @@ function ModalLoading({ title }: ModalLoadingProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default ModalLoading;
+export default ModalLoading

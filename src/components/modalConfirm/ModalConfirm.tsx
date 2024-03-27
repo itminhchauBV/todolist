@@ -1,14 +1,11 @@
-import "./ModalConfirm.scss";
+import './ModalConfirm.scss'
 
 interface ModalconfirmProps {
-  handleDelete: () => void;
-  handleCancelModalDelete: () => void;
+  handleDelete: () => void
+  handleCancelModalDelete: () => void
 }
 
-function ModalConfirm({
-  handleDelete,
-  handleCancelModalDelete,
-}: ModalconfirmProps) {
+function ModalConfirm({ handleDelete, handleCancelModalDelete }: ModalconfirmProps) {
   return (
     <div className="modal-confirm">
       <div className="modal_overlay">
@@ -25,7 +22,7 @@ function ModalConfirm({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default ModalConfirm;
+export default ModalConfirm

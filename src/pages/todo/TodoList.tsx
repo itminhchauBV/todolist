@@ -27,6 +27,8 @@ function TodoList() {
   const [selectPosts, setSelectPosts] = useState<number[]>([]);
   const [listPost, setListPost] = useState<Post[]>([]);
   const [showModalDelete, setShowModalDelete] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const [checkDeleteMultiple, setCheckDeleteMultiple] =
     useState<boolean>(false);
   //   const [isDelete, setIsDelete] = useState<boolean>(false);
@@ -102,19 +104,29 @@ function TodoList() {
   };
 
   const handleDelete = () => {
-    // setIsDelete(true);
+    setIsDeleting(true);
     if (checkDeleteMultiple) {
       handleDeletMultiple();
     } else {
       const newListPost = listPost.filter((item) => item.id !== deletePostId);
       setListPost(newListPost);
-      deletePost(deletePostId);
-      console.log("status", deletePostResult);
-      if (!deletePostResult.isSuccess) {
-        if (data) {
-          setListPost(data);
-        }
-      }
+      deletePost(deletePostId)
+        .unwrap()
+        .then(() => {
+          console.log("da xoa thanh cong");
+
+          setIsDeleting(false);
+        })
+        .catch(() => {
+          if (data) {
+            setListPost(data);
+          }
+        });
+      // if (!deletePostResult.isSuccess) {
+      //   if (data) {
+      //     setListPost(data);
+      //   }
+      // }
       setShowModalDelete(false);
       setDeletePostId(0);
     }
@@ -155,11 +167,20 @@ function TodoList() {
   };
 
   useEffect(() => {
-    if (data) {
+    console.log("check isdeleting", isDeleting);
+    console.log("check issucces", isSuccess);
+
+    if (!isDeleting && isSuccess) {
+      console.log("goi api");
+
+      // Gọi API post
       setListPost(data);
-      console.log("da goi");
     }
-  }, [data]);
+    // if (data) {
+    //   setListPost(data);
+    //   console.log("da goi");
+    // }
+  }, [data, isDeleting, isSuccess]);
 
   return (
     <div className="container">

@@ -50,7 +50,7 @@ export const todoApi = createApi({
           body: data.body,
         }
       },
-      invalidatesTags: (result, error, data) => [{ type: 'Posts', id: data.id }],
+      // invalidatesTags: (result, error, data) => [{ type: 'Posts', id: data.id }],
     }),
 
     deletePost: build.mutation<{}, number>({
@@ -67,7 +67,7 @@ export const todoApi = createApi({
       async queryFn(idPosts, _queryApi, _extraOptions, baseQuery) {
         for (const idPost of idPosts) {
           await baseQuery({
-            url: `posts/${idPost}/`,
+            url: `posts/${idPost}`,
             method: 'DELETE',
           })
         }

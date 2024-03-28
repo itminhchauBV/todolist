@@ -7,9 +7,18 @@ interface ItemTodoProps {
   selectPosts: number[]
   setSelectPosts: React.Dispatch<React.SetStateAction<number[]>>
   idChecked: number
+  setIsCheckItem: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-function ItemTodo({ item, handleClickDelete, handleEdit, selectPosts, setSelectPosts, idChecked }: ItemTodoProps) {
+function ItemTodo({
+  item,
+  handleClickDelete,
+  handleEdit,
+  selectPosts,
+  setSelectPosts,
+  idChecked,
+  setIsCheckItem,
+}: ItemTodoProps) {
   return (
     <div className={idChecked === item.id ? 'item disable' : 'item'} key={item.id}>
       <span className="title">{item.title}</span>
@@ -26,8 +35,10 @@ function ItemTodo({ item, handleClickDelete, handleEdit, selectPosts, setSelectP
           onChange={(e) => {
             if (e.target.checked) {
               setSelectPosts([...selectPosts, item.id])
+              setIsCheckItem(true)
             } else {
               setSelectPosts(selectPosts.filter((id) => id !== item.id))
+              setIsCheckItem(true)
             }
           }}
         />

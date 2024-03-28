@@ -30,6 +30,7 @@ function TodoList() {
   const [showModalDelete, setShowModalDelete] = useState<boolean>(false)
   const [checkDeleteMultiple, setCheckDeleteMultiple] = useState<boolean>(false)
   const [checkErrorDelete, setCheckErrorDelete] = useState<boolean>(false)
+  const [isCheckItem, setIsCheckItem] = useState<boolean>(false)
 
   const { data, isSuccess, isFetching, refetch } = useGetPostsQuery('posts')
 
@@ -67,6 +68,8 @@ function TodoList() {
     e.preventDefault()
     if (!modeEdit) {
       addPost(formData)
+        .unwrap()
+        .then(() => {})
     } else {
       const newListPost = listPost.map((post, index) => {
         if (post.id === editPostId) {
@@ -87,7 +90,6 @@ function TodoList() {
         .unwrap()
         .then(() => {})
         .catch((error) => {
-          setCheckErrorDelete(true)
           if (data) {
             refetch()
             setListPost(data)
@@ -111,11 +113,13 @@ function TodoList() {
       const newListPost = listPost.filter((item) => item.id !== deletePostId)
       setListPost(newListPost)
 
-      //   dataRef.current = newListPost
-
       deletePost(deletePostId)
         .unwrap()
-        .then((res) => {})
+        .then((res) => {
+          if (selectPosts) {
+            selectPosts.pop()
+          }
+        })
         .catch(() => {
           if (data) {
             refetch()
@@ -172,6 +176,17 @@ function TodoList() {
       setListPost(data)
     }
   }, [data])
+
+  useEffect(() => {
+    if (listPost.length === selectPosts.length && listPost.length !== 0) {
+      setChooseAll(true)
+    }
+    if (listPost.length !== selectPosts.length && deletePostResult.isLoading) {
+      setChooseAll(true)
+    } else {
+      setChooseAll(false)
+    }
+  }, [listPost, selectPosts, deletePostResult.isLoading])
 
   return (
     <div className="container">
@@ -243,6 +258,7 @@ function TodoList() {
                     key={item.id}
                     item={item}
                     handleClickDelete={handleClickDelete}
+                    setIsCheckItem={setIsCheckItem}
                     handleEdit={handleEdit}
                     selectPosts={selectPosts}
                     setSelectPosts={setSelectPosts}
